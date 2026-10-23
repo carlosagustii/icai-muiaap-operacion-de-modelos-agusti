@@ -8,18 +8,23 @@ from typing import Literal
 class WineQualityRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    fixed_acidity: float = Field(ge=0, le=20)
-    volatile_acidity: float = Field(ge=0, le=2)
-    citric_acid: float = Field(ge=0, le=1)
-    residual_sugar: float = Field(ge=0, le=20)
-    chlorides: float = Field(ge=0, le=1)
-    free_sulfur_dioxide: float = Field(ge=0, le=100)
-    total_sulfur_dioxide: float = Field(ge=0, le=350)
-    density: float = Field(ge=0, le=1.1)
-    ph: float = Field(ge=0, le=4.5)
-    sulphates: float = Field(ge=0, le=3)
-    alcohol: float = Field(ge=5, le=20)
+    fixed_acidity:          float = Field(ge=0, le=20)
+    volatile_acidity:       float = Field(ge=0, le=2)
+    citric_acid:            float = Field(ge=0, le=1)
+    residual_sugar:         float = Field(ge=0, le=20)
+    chlorides:              float = Field(ge=0, le=1)
+    free_sulfur_dioxide:    float = Field(ge=0, le=100)
+    total_sulfur_dioxide:   float = Field(ge=0, le=350)
+    density:                float = Field(ge=0, le=1.1)
+    ph:                     float = Field(ge=0, le=4.5)
+    sulphates:              float = Field(ge=0, le=3)
+    alcohol:                float = Field(ge=5, le=20)
 
 
 class WineQualityPrediction(BaseModel):
-    prediction: Literal["needs_review", "acceptable", "excellent"]
+    model_config = ConfigDict(extra="forbid")
+
+    quality_band:           Literal["needs_review", "acceptable", "excellent"]
+    confidence:             float = Field(ge=0, le=1)
+    model_version:          Literal["wine-quality-rf-v1"]
+    preprocessing_version:  Literal["wine-red-features-v1"] #lo saco del test del assert 
