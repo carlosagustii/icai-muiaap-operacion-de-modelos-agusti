@@ -3,6 +3,7 @@
 # Implementa WineQualityRequest y WineQualityPrediction con Pydantic.
 # Revisa los campos de assets/inference_samples.csv y prohíbe columnas extra.
 from pydantic import BaseModel, Field, ConfigDict 
+from typing import Literal
 
 class WineQualityRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -14,11 +15,11 @@ class WineQualityRequest(BaseModel):
     chlorides: float = Field(ge=0, le=1)
     free_sulfur_dioxide: float = Field(ge=0, le=100)
     total_sulfur_dioxide: float = Field(ge=0, le=350)
-    density: float = Field(ge=0, le=1)
+    density: float = Field(ge=0, le=1.1)
     ph: float = Field(ge=0, le=4.5)
     sulphates: float = Field(ge=0, le=3)
     alcohol: float = Field(ge=5, le=20)
 
 
 class WineQualityPrediction(BaseModel):
-    prediction:float = Field(ge=0, le=1)
+    prediction: Literal["needs_review", "acceptable", "excellent"]
