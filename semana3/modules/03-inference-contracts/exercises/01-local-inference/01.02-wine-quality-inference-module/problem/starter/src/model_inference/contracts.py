@@ -24,7 +24,7 @@ class WineQualityRequest(BaseModel):
 class WineQualityPrediction(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    quality_band:           Literal["needs_review", "acceptable", "excellent"]
+    quality_band:           Literal["needs_review", "acceptable", "excellent"]#lo saco del test del assert
     confidence:             float = Field(ge=0, le=1)
-    model_version:          Literal["wine-quality-rf-v1"]
-    preprocessing_version:  Literal["wine-red-features-v1"] #lo saco del test del assert 
+    model_version:          str = Field(min_length=1)
+    preprocessing_version:  str = Field(min_length=1)  
