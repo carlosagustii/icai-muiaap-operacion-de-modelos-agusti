@@ -8,16 +8,18 @@ from model_inference.preprocess import FEATURE_NAMES
 import joblib
 
 
-DEFAULT_MODEL_PATH = Path(r"C:\TRASTEO\icai-muiaap-operacion-de-modelos-agusti\semana3\modules\03-inference-contracts\exercises\01-local-inference\01.02-wine-quality-inference-module\problem\starter\models\wine_quality_classifier.joblib")
-def load_wine_quality_model(Path = DEFAULT_MODEL_PATH): #se queda como default, si no meto ninguna ruta usa esa
-    artefacto = joblib.load(Path)
+DEFAULT_MODEL_PATH = Path(r"models\wine_quality_classifier.joblib")
+def load_wine_quality_model(ruta = DEFAULT_MODEL_PATH): #se queda como default, si no meto ninguna ruta usa esa
+    artefacto = joblib.load(ruta)
     estimador = artefacto.get("estimator")
     if not hasattr(estimador, "predict_proba"):   ### PREGUNTA: no entiendo por que tengo que comprobar predict_proba
-        raise ValueError("El artefacto no tiene las características necesarias" \
+        raise ValueError("El artefacto no tiene las un clasificador compatible" # debe tener tambien las palabras clasificador compatible
         "")
     elif artefacto["feature_names"]!=list(FEATURE_NAMES):
-        raise ValueError("Los features no son los mismos")
+        raise ValueError("features_names no son los mismos")  #al parecer el test usa completed.stderr, fuerza que este
+                                                              #mal y mira a ver si esta feature_names en el error tal cual
     return artefacto
 
 
-def infer_wine_quality()
+def infer_wine_quality():
+    pass
