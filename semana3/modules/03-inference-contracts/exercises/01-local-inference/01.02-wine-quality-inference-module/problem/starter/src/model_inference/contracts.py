@@ -4,7 +4,7 @@
 # Revisa los campos de assets/inference_samples.csv y prohíbe columnas extra.
 from pydantic import BaseModel, Field, ConfigDict 
 from typing import Literal
-
+ 
 class WineQualityRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
