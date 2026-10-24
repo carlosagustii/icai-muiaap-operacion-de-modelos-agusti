@@ -9,7 +9,7 @@ from model_inference.contracts import WineQualityPrediction
 import joblib
 
 
-DEFAULT_MODEL_PATH = Path("models/wine_quality_classifier.joblib")
+DEFAULT_MODEL_PATH = Path("/models/wine_quality_classifier.joblib")
 
 def load_wine_quality_model(ruta = DEFAULT_MODEL_PATH): #se queda como default, si no meto ninguna ruta usa esa
     artefacto = joblib.load(ruta)

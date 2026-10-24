@@ -1,9 +1,38 @@
 """TODO: script CLI que encadena contratos, preprocesado e inferencia."""
 import pandas as pd
 from src.model_inference.contracts import WineQualityRequest
+from src.model_inference.inference import DEFAULT_MODEL_PATH, load_wine_quality_model, infer_wine_quality
+from src.model_inference.preprocess import preprocess_wine_request
+import argparse
+from pathlib import Path
+import csv
 # Implementa el comando:
 # python -m model_inference.predict_file --input <csv> --output <csv>
 # No dejes un archivo de salida parcial si alguna fila es inválida.
-df_csv = pd.read_csv("assets/inference_samples.csv")
-for index, row in df_csv:
-    WineQualityRequest(row)
+
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model", default=DEFAULT_MODEL_PATH)
+    parser.add_argument("--input", required=True, type=Path)
+    parser.add_argument("--output", required=True, type=Path)
+    args = parser.parse_args()
+    print(args.model, args.input, args.output)
+
+    with open(args.input, newline="", encoding="utf-8") as f:
+        lector = csv.DictReader(f)
+        lista = []
+        for fila in lector:
+            sample_id = fila["sample_id"]
+            fila.pop("sample_id")
+            request= WineQualityRequest(**fila) #los ** traducen a clave = valor para la request
+            vector = preprocess_wine_request(request)
+            artefacto = load_wine_quality_model(args.model)
+            prediction = infer_wine_quality(artefacto, vector)
+            lista = [sample_id, prediction]
+            print(lista)
+    
+
+if __name__ == "__main__":
+    main()
