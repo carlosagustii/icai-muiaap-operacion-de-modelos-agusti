@@ -28,7 +28,7 @@ def main():
             for fila in lector:
                 sample_id = fila["sample_id"]
                 fila.pop("sample_id")
-                if not sample_id.strip():
+                if not sample_id.strip(): #me lo ha hecho chat no he entendido bien esta parte para que pase el test
                     raise ValueError("sample_id vacío: cada fila necesita un identificador")
                 try:
                     request= WineQualityRequest(**fila) #los ** traducen a clave = valor para la request
