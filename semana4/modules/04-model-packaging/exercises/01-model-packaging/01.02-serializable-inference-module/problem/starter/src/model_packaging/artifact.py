@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
+import joblib
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -14,6 +15,7 @@ from model_packaging.contracts import (
     WineQualityPrediction,
     WineQualityRequest,
 )
+from model_packaging.preprocess import FEATURE_NAMES, PREPROCESSING_VERSION
 
 ARTIFACT_SCHEMA_VERSION = "wine-quality-bundle-v1"
 DEFAULT_BUNDLE_PATH = Path("models/wine_quality_bundle")
@@ -61,8 +63,12 @@ def create_manifest(
     estimator: WineQualityEstimator, model_version: str
 ) -> ArtifactManifest:
     """TODO: devuelve un manifiesto compatible con el contrato."""
-
-    raise NotImplementedError("Implementa create_manifest().")
+    return ArtifactManifest(schema_version= ARTIFACT_SCHEMA_VERSION,
+                            model_version= model_version,
+                            preprocessing_version = PREPROCESSING_VERSION,
+                            feature_names= FEATURE_NAMES,
+                            output_labels= OUTPUT_LABELS,
+                            estimator_type= type(estimator).__name__)
 
 
 def save_model_bundle(
@@ -71,8 +77,20 @@ def save_model_bundle(
     manifest: ArtifactManifest | None = None,
 ) -> ArtifactManifest:
     """TODO: escribe manifest.json y model.joblib de forma segura."""
+    if manifest is None:
+        create_manifest(estimator, model_version="unknown")
 
-    raise NotImplementedError("Implementa save_model_bundle().")
+    bundle_path.mkdir(parents=True, exist_ok=True) #creo la carpeta en el path que me pasan
+
+    (bundle_path / MANIFEST_FILENAME).write_text(  # ni idea de esta parte
+        manifest.model_dump_json(indent=2), encoding="utf-8"
+    )
+
+    joblib.dump({"estimator": estimator}, bundle_path / MODEL_FILENAME)
+
+    return manifest
+
+    
 
 
 def load_model_bundle(bundle_path: Path) -> LoadedModelBundle:
