@@ -30,9 +30,16 @@ def main():
             vector = preprocess_wine_request(request)
             artefacto = load_wine_quality_model(args.model)
             prediction = infer_wine_quality(artefacto, vector)
-            lista = [sample_id, prediction]
-            print(lista)
-    
+            lista.append([sample_id, prediction])
+
+    with open(args.output, "w", newline="", encoding="utf-8") as e:
+        writer = csv.DictWriter(e, fieldnames=["sample_id", "quality_band", "confidence", "model_version", "preprocessing_version"])
+        writer.writeheader() 
+        for i in range(len(lista)):
+            dicc = {"sample_id" :lista[i][0]}
+            dicc.update(lista[i][1].model_dump())
+            writer.writerow(dicc)
+            
 
 if __name__ == "__main__":
     main()
