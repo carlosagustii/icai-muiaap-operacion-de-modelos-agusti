@@ -3,6 +3,7 @@ from pydantic import BaseModel
 from model_inference.contracts import WineQualityRequest
 import numpy as np
 
+PREPROCESSING_VERSION = "wine-red-features-v1"
 
 # Este contrato se entrega ya decidido: no cambies ni los nombres ni el orden.
 FEATURE_NAMES = (
@@ -27,6 +28,6 @@ class WineFeatures(BaseModel): #hay que definirlo para el test
         return self.lista
     
 def preprocess_wine_request(WineQualityRequest):
-    data = WineFeatures(lista = [getattr(WineQualityRequest, nombres) for nombres in FEATURE_NAMES])
-    return data
+    vector = WineFeatures(lista = [getattr(WineQualityRequest, nombres) for nombres in FEATURE_NAMES])
+    return vector
 
