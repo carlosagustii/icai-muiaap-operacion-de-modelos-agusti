@@ -39,8 +39,6 @@ class WineQualityEstimator(Protocol):
 
 
 class ArtifactManifest(BaseModel):
-    """TODO: declara y valida los metadatos del bundle."""
-
     model_config = ConfigDict(extra="forbid")
 
     schema_version: str
@@ -95,8 +93,13 @@ def save_model_bundle(
 
 def load_model_bundle(bundle_path: Path) -> LoadedModelBundle:
     """TODO: valida el manifiesto antes de cargar el estimador."""
-
-    raise NotImplementedError("Implementa load_model_bundle().")
+    texto = (bundle_path/MANIFEST_FILENAME).read_text(encoding="utf-8")
+    mainifiesto = ArtifactManifest.model_validate_json(texto)
+    if mainifiesto.feature_names != FEATURE_NAMES:
+        raise ValueError("Error en las caracteristicas del estimador")
+    artefacto = joblib.load(bundle_path/MANIFEST_FILENAME)
+    estimador = artefacto.get("estimator")
+    return LoadedModelBundle(estimator= estimador, manifest= mainifiesto)
 
 
 def infer_wine_quality(
