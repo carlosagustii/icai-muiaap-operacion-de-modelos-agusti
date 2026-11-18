@@ -14,5 +14,6 @@ VARIABLES = [
 ]
 
 # TODO: cargar el modelo joblib una sola vez, al importar el modulo
+
 # TODO: funcion decidir(probabilidad) -> "aprobar", "revisar" o "rechazar" (umbrales en el enunciado)
 # TODO: funcion predecir(entrada) -> PrediccionSalida, usando VARIABLES para ordenar los valores
