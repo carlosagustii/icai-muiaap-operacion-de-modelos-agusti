@@ -15,7 +15,7 @@ from model_packaging.contracts import (
     WineQualityPrediction,
     WineQualityRequest,
 )
-from model_packaging.preprocess import FEATURE_NAMES, PREPROCESSING_VERSION
+from model_packaging.preprocess import FEATURE_NAMES, PREPROCESSING_VERSION, preprocess_wine_request
 
 ARTIFACT_SCHEMA_VERSION = "wine-quality-bundle-v1"
 DEFAULT_BUNDLE_PATH = Path("models/wine_quality_bundle")
@@ -97,7 +97,7 @@ def load_model_bundle(bundle_path: Path) -> LoadedModelBundle:
     mainifiesto = ArtifactManifest.model_validate_json(texto)
     if mainifiesto.feature_names != FEATURE_NAMES:
         raise ValueError("Error en las caracteristicas del estimador")
-    artefacto = joblib.load(bundle_path/MANIFEST_FILENAME)
+    artefacto = joblib.load(bundle_path/MODEL_FILENAME)
     estimador = artefacto.get("estimator")
     return LoadedModelBundle(estimator= estimador, manifest= mainifiesto)
 
@@ -107,5 +107,12 @@ def infer_wine_quality(
     request: WineQualityRequest,
 ) -> WineQualityPrediction:
     """TODO: preprocesa, invoca el estimador y valida la respuesta."""
-
-    raise NotImplementedError("Implementa infer_wine_quality().")
+    vector = preprocess_wine_request(request).as_vector()
+    quality = bundle.estimator.predict([vector])[0]
+    confidence = max(bundle.estimator.predict_proba([vector])[0])
+    return WineQualityPrediction(
+        quality_band= quality,
+        confidence= confidence,
+        model_version=bundle.manifest.model_version,
+        preprocessing_version=bundle.manifest.preprocessing_version
+    )
