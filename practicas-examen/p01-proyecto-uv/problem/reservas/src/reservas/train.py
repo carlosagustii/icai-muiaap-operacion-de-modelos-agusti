@@ -13,6 +13,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
+from pathlib import Path
+
 NUMERICAS = [
     "antelacion_dias",
     "noches",
@@ -32,8 +34,9 @@ OBJETIVO = "cancelada"
 #     RUTA_DATOS  -> RAIZ / data / raw / reservas_hotel.csv
 #     RUTA_MODELO -> RAIZ / models / modelo.joblib
 #   Comprobacion: tests/test_train.py::test_rutas_relativas_a_la_raiz
-RUTA_DATOS = "reservas_hotel.csv"
-RUTA_MODELO = "modelo.joblib"
+RAIZ = Path("__file__").resolve.parents[2]
+RUTA_DATOS = RAIZ/"data"/"raw"/"reservas_hotel.csv"
+RUTA_MODELO = RAIZ / "models" / "modelo.joblib"
 
 # TODO 2 (reproducibilidad): sin semilla, cada entrenamiento da una metrica
 #   distinta. Fija SEMILLA a un entero y usala en train_test_split.

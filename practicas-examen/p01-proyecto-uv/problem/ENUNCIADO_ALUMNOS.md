@@ -10,7 +10,7 @@ Un hotel quiere estimar el **riesgo de que una reserva se cancele**. Un
 compañero ha dejado un prototipo que funciona en su portátil, pero no es un
 proyecto:
 
-```
+``` 
 train.py              entrenamiento sacado de un notebook
 reservas_hotel.csv    datos (sintéticos) de 2000 reservas
 test_train.py         tests que tu proyecto tiene que pasar (NO MODIFICAR)
