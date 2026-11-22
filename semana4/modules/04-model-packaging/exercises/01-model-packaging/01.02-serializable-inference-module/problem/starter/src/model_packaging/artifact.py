@@ -6,6 +6,7 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
+import joblib
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -14,6 +15,7 @@ from model_packaging.contracts import (
     WineQualityPrediction,
     WineQualityRequest,
 )
+from model_packaging.preprocess import FEATURE_NAMES, PREPROCESSING_VERSION, preprocess_wine_request
 
 ARTIFACT_SCHEMA_VERSION = "wine-quality-bundle-v1"
 DEFAULT_BUNDLE_PATH = Path("models/wine_quality_bundle")
@@ -37,8 +39,6 @@ class WineQualityEstimator(Protocol):
 
 
 class ArtifactManifest(BaseModel):
-    """TODO: declara y valida los metadatos del bundle."""
-
     model_config = ConfigDict(extra="forbid")
 
     schema_version: str
@@ -61,8 +61,12 @@ def create_manifest(
     estimator: WineQualityEstimator, model_version: str
 ) -> ArtifactManifest:
     """TODO: devuelve un manifiesto compatible con el contrato."""
-
-    raise NotImplementedError("Implementa create_manifest().")
+    return ArtifactManifest(schema_version= ARTIFACT_SCHEMA_VERSION,
+                            model_version= model_version,
+                            preprocessing_version = PREPROCESSING_VERSION,
+                            feature_names= FEATURE_NAMES,
+                            output_labels= OUTPUT_LABELS,
+                            estimator_type= type(estimator).__name__)
 
 
 def save_model_bundle(
@@ -71,14 +75,31 @@ def save_model_bundle(
     manifest: ArtifactManifest | None = None,
 ) -> ArtifactManifest:
     """TODO: escribe manifest.json y model.joblib de forma segura."""
+    if manifest is None:
+        create_manifest(estimator, model_version="unknown")
 
-    raise NotImplementedError("Implementa save_model_bundle().")
+    bundle_path.mkdir(parents=True, exist_ok=True) #creo la carpeta en el path que me pasan
+
+    (bundle_path / MANIFEST_FILENAME).write_text(  # ni idea de esta parte
+        manifest.model_dump_json(indent=2), encoding="utf-8"
+    )
+
+    joblib.dump({"estimator": estimator}, bundle_path / MODEL_FILENAME)
+
+    return manifest
+
+    
 
 
 def load_model_bundle(bundle_path: Path) -> LoadedModelBundle:
     """TODO: valida el manifiesto antes de cargar el estimador."""
-
-    raise NotImplementedError("Implementa load_model_bundle().")
+    texto = (bundle_path/MANIFEST_FILENAME).read_text(encoding="utf-8")
+    mainifiesto = ArtifactManifest.model_validate_json(texto)
+    if mainifiesto.feature_names != FEATURE_NAMES:
+        raise ValueError("Error en las caracteristicas del estimador")
+    artefacto = joblib.load(bundle_path/MODEL_FILENAME)
+    estimador = artefacto.get("estimator")
+    return LoadedModelBundle(estimator= estimador, manifest= mainifiesto)
 
 
 def infer_wine_quality(
@@ -86,5 +107,12 @@ def infer_wine_quality(
     request: WineQualityRequest,
 ) -> WineQualityPrediction:
     """TODO: preprocesa, invoca el estimador y valida la respuesta."""
-
-    raise NotImplementedError("Implementa infer_wine_quality().")
+    vector = preprocess_wine_request(request).as_vector()
+    quality = bundle.estimator.predict([vector])[0]
+    confidence = max(bundle.estimator.predict_proba([vector])[0])
+    return WineQualityPrediction(
+        quality_band= quality,
+        confidence= confidence,
+        model_version=bundle.manifest.model_version,
+        preprocessing_version=bundle.manifest.preprocessing_version
+    )
