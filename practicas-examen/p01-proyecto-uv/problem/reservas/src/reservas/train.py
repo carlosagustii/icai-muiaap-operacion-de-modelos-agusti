@@ -4,6 +4,8 @@ Viene de un notebook. Funciona si lo ejecutas desde la carpeta donde esta el
 CSV, pero todavia no es un proyecto: no tiene entorno, ni dependencias
 declaradas, ni rutas fiables, ni resultados reproducibles.
 """
+from pathlib import Path
+
 import joblib
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -32,13 +34,15 @@ OBJETIVO = "cancelada"
 #     RUTA_DATOS  -> RAIZ / data / raw / reservas_hotel.csv
 #     RUTA_MODELO -> RAIZ / models / modelo.joblib
 #   Comprobacion: tests/test_train.py::test_rutas_relativas_a_la_raiz
-RUTA_DATOS = "reservas_hotel.csv"
-RUTA_MODELO = "modelo.joblib"
+# train.py -> parents[0] = src/reservas, parents[1] = src, parents[2] = raiz
+RAIZ = Path(__file__).resolve().parents[2]
+RUTA_DATOS = RAIZ / "data" / "raw" / "reservas_hotel.csv"
+RUTA_MODELO = RAIZ / "models" / "modelo.joblib"
 
 # TODO 2 (reproducibilidad): sin semilla, cada entrenamiento da una metrica
 #   distinta. Fija SEMILLA a un entero y usala en train_test_split.
 #   Comprobacion: tests/test_train.py::test_entrenamiento_reproducible
-SEMILLA = None
+SEMILLA = 46
 
 
 def cargar_datos(ruta=RUTA_DATOS) -> pd.DataFrame:
@@ -66,7 +70,7 @@ def entrenar(ruta=RUTA_DATOS):
     datos = cargar_datos(ruta)
     X = datos[VARIABLES]
     y = datos[OBJETIVO]
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=SEMILLA)
     modelo = construir_modelo()
     modelo.fit(X_train, y_train)
     predicciones = modelo.predict(X_test)
@@ -82,6 +86,7 @@ def guardar_modelo(modelo, ruta=RUTA_MODELO):
     # TODO 3: crea la carpeta de destino si no existe (Path.mkdir con parents
     #   y exist_ok) antes de guardar.
     #   Comprobacion: tests/test_train.py::test_guardar_modelo
+    Path(ruta).parent.mkdir(parents=True, exist_ok=True)
     joblib.dump(modelo, ruta)
     return ruta
 

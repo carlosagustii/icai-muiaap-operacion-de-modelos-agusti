@@ -21,7 +21,16 @@ def validar_campos(datos: dict) -> None:
     #   de `datos` no estan en VARIABLES. Si hay alguna, lanza ValueError con un
     #   mensaje que incluya sus nombres (el usuario tiene que saber que corregir).
     #   Comprobacion: tests/test_features.py::test_validar_campos_*
-    raise NotImplementedError("TODO: validar_campos")
+    esperadas = set(VARIABLES)
+    recibidas = set(datos)
+    faltan = esperadas - recibidas
+    sobran = recibidas - esperadas
+
+    if faltan:
+        raise ValueError(f"faltan {faltan} en datos")
+    elif sobran:
+        raise ValueError(f"sobran {sobran} en datos")
+
 
 
 def preparar_fila(datos: dict) -> pd.DataFrame:
@@ -30,4 +39,6 @@ def preparar_fila(datos: dict) -> pd.DataFrame:
     #   columns=VARIABLES. El modelo se entreno con ese orden: un diccionario
     #   puede llegar desordenado y no debe importar.
     #   Comprobacion: tests/test_features.py::test_preparar_fila_*
-    raise NotImplementedError("TODO: preparar_fila")
+    validar_campos(datos)
+    df = pd.DataFrame([datos], columns= VARIABLES)
+    return df
